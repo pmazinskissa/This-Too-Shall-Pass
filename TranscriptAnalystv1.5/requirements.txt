@@ -1,0 +1,9 @@
+flask
+python-dotenv
+openai
+python-docx
+gunicorn
+markdown
+requests
+pytest
+flask-session
