@@ -116,7 +116,6 @@ class SummaryGenerator:
             "decisions_made": [],
             "actions_planned": [],
             "open_questions": [],
-            "risks_mitigations": [],
             "key_quotes": [],
             "sentiment_analysis": "",
             "content_gaps": [],
@@ -202,30 +201,51 @@ class SummaryGenerator:
                         "owner": owner.strip()
                     })
 
-            elif "Risks & Mitigations" in section_title:
-                # Extract table rows
-                table_pattern = r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|'
-                risks = re.findall(table_pattern, section_content)
-                # Skip the header row if present
-                for i, (risk, impact, mitigation, owner) in enumerate(risks):
-                    if i == 0 and (risk.strip() == "Risk" or "---" in risk):
-                        continue
-                    sections["risks_mitigations"].append({
-                        "risk": risk.strip(),
-                        "impact": impact.strip(),
-                        "mitigation": mitigation.strip(),
-                        "owner": owner.strip()
-                    })
-
             elif "Key Quotes" in section_title:
-                # Extract blockquotes
-                quote_pattern = r'>\s*"(.*?)"\s*–\s*(.*?)(?=\n>|\n\n|$)'
-                quotes = re.findall(quote_pattern, section_content)
-                for quote_text, attribution in quotes:
-                    sections["key_quotes"].append({
-                        "quote": quote_text.strip(),
-                        "attribution": attribution.strip()
-                    })
+                # Extract blockquotes with multiple format support
+                quote_patterns = [
+                    # Standard blockquote format: > "quote" – attribution
+                    r'>\s*"([^"]+)"\s*–\s*(.+?)(?=\n>|\n\n|$)',
+                    # Blockquote with em dash: > "quote" — attribution
+                    r'>\s*"([^"]+)"\s*—\s*(.+?)(?=\n>|\n\n|$)',
+                    # Blockquote without quotes: > quote – attribution
+                    r'>\s*([^"–—]+?)\s*–\s*(.+?)(?=\n>|\n\n|$)',
+                    # Simple format: "quote" – attribution (no >)
+                    r'"([^"]+)"\s*–\s*(.+?)(?=\n|$)',
+                    # Simple format with em dash: "quote" — attribution
+                    r'"([^"]+)"\s*—\s*(.+?)(?=\n|$)',
+                ]
+
+                quotes_found = False
+                for pattern in quote_patterns:
+                    quotes = re.findall(pattern, section_content, re.MULTILINE | re.DOTALL)
+                    if quotes:
+                        for quote_text, attribution in quotes:
+                            quote_text = quote_text.strip()
+                            attribution = attribution.strip()
+                            if quote_text and attribution:
+                                sections["key_quotes"].append({
+                                    "quote": quote_text,
+                                    "attribution": attribution
+                                })
+                        quotes_found = True
+                        break
+
+                # If no quotes found with patterns, try to extract any meaningful content
+                if not quotes_found:
+                    # Look for any lines that might be quotes
+                    lines = section_content.split('\n')
+                    for line in lines:
+                        line = line.strip()
+                        # Skip empty lines and markdown artifacts
+                        if line and not line.startswith('#') and not re.match(r'^[\s\-|:>]+$', line):
+                            # Remove blockquote markers
+                            line = re.sub(r'^>\s*', '', line)
+                            if line.strip():
+                                sections["key_quotes"].append({
+                                    "quote": line.strip(),
+                                    "attribution": "Unknown"
+                                })
 
             elif "Sentiment Analysis" in section_title:
                 sections["sentiment_analysis"] = section_content
