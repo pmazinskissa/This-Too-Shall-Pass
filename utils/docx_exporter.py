@@ -33,6 +33,13 @@ class DocxExporter:
         # If we have the markdown, use that directly
         if 'markdown' in summary and summary['markdown']:
             self._add_from_markdown(doc, summary['markdown'])
+
+            # Check if key quotes were properly added from markdown
+            # If not, add them from structured data as fallback
+            if summary.get("key_quotes") and self._should_add_quotes_fallback(summary['markdown']):
+                print("Adding key quotes from structured data as fallback...")
+                doc.add_heading("Key Quotes", level=1)
+                self._add_key_quotes_structured(doc, summary.get("key_quotes", []))
         else:
             # Otherwise use the previously extracted structured data
             # Add executive summary
@@ -53,9 +60,6 @@ class DocxExporter:
             # Add open questions table
             self._add_open_questions_table(doc, summary.get("open_questions", []))
 
-            # Add risks and mitigations table
-            self._add_risks_table(doc, summary.get("risks_mitigations", []))
-
             # Add key quotes
             self._add_key_quotes(doc, summary.get("key_quotes", []))
 
@@ -70,6 +74,133 @@ class DocxExporter:
 
         # Save document
         doc.save(output_path)
+
+    def _add_key_quotes_from_markdown(self, doc: Document, section_content: str) -> None:
+        """
+        Extract and add key quotes from markdown content with multiple format support
+
+        Args:
+            doc: The Document object
+            section_content: The markdown content for the Key Quotes section
+        """
+        import re
+
+        # Debug: Print the section content to understand the format
+        print(f"Key Quotes section content:\n{repr(section_content)}")
+
+        quotes_added = False
+
+        # Try multiple quote patterns to handle different formats
+        quote_patterns = [
+            # Standard blockquote format: > "quote" – attribution
+            r'>\s*"([^"]+)"\s*–\s*(.+?)(?=\n>|\n\n|$)',
+            # Blockquote with em dash: > "quote" — attribution
+            r'>\s*"([^"]+)"\s*—\s*(.+?)(?=\n>|\n\n|$)',
+            # Blockquote without quotes: > quote – attribution
+            r'>\s*([^"–—]+?)\s*–\s*(.+?)(?=\n>|\n\n|$)',
+            # Simple format: "quote" – attribution (no >)
+            r'"([^"]+)"\s*–\s*(.+?)(?=\n|$)',
+            # Simple format with em dash: "quote" — attribution
+            r'"([^"]+)"\s*—\s*(.+?)(?=\n|$)',
+        ]
+
+        for pattern in quote_patterns:
+            quotes = re.findall(pattern, section_content, re.MULTILINE | re.DOTALL)
+            if quotes:
+                print(f"Found {len(quotes)} quotes with pattern: {pattern}")
+                for quote_text, attribution in quotes:
+                    quote_text = quote_text.strip()
+                    attribution = attribution.strip()
+
+                    # Skip empty quotes
+                    if quote_text and attribution:
+                        p = doc.add_paragraph(style='Quote')
+                        p.add_run(f'"{quote_text}"')
+                        p.add_run(f" — {attribution}")
+                        quotes_added = True
+                break  # Use the first pattern that finds quotes
+
+        # If no quotes found, try to extract any text that looks like quotes
+        if not quotes_added:
+            # Look for any quoted text in the section
+            quote_lines = []
+            for line in section_content.split('\n'):
+                line = line.strip()
+                # Skip empty lines and markdown artifacts
+                if line and not line.startswith('#') and not re.match(r'^[\s\-|:>]+$', line):
+                    quote_lines.append(line)
+
+            if quote_lines:
+                print(f"Adding {len(quote_lines)} quote lines as fallback")
+                for line in quote_lines:
+                    # Clean up the line
+                    line = re.sub(r'^>\s*', '', line)  # Remove blockquote markers
+                    if line.strip():
+                        p = doc.add_paragraph(style='Quote')
+                        p.add_run(line.strip())
+                        quotes_added = True
+
+        # If still no quotes, add a note
+        if not quotes_added:
+            print("No quotes found, adding fallback message")
+            doc.add_paragraph("No notable quotes recorded.")
+
+    def _should_add_quotes_fallback(self, markdown_text: str) -> bool:
+        """
+        Check if the Key Quotes section in markdown appears to be empty or malformed
+
+        Args:
+            markdown_text: The full markdown text
+
+        Returns:
+            True if we should use structured data fallback for quotes
+        """
+        import re
+
+        # Find the Key Quotes section
+        section_pattern = r'##\s+\d+\.\s+Key Quotes\s*\n(.*?)(?=##\s+\d+\.|$)'
+        match = re.search(section_pattern, markdown_text, re.DOTALL)
+
+        if not match:
+            return True  # No Key Quotes section found
+
+        quotes_content = match.group(1).strip()
+
+        # Check if the section is essentially empty or only contains "No notable quotes"
+        if not quotes_content or "No notable quotes" in quotes_content or len(quotes_content) < 20:
+            return True
+
+        # Check if there are actual quote markers (> or ")
+        if '>' not in quotes_content and '"' not in quotes_content:
+            return True
+
+        return False
+
+    def _add_key_quotes_structured(self, doc: Document, quotes: List[Any]) -> None:
+        """
+        Add key quotes from structured data (not markdown)
+
+        Args:
+            doc: The Document object
+            quotes: List of quote dictionaries or strings
+        """
+        if not quotes:
+            doc.add_paragraph("No notable quotes recorded.")
+            return
+
+        for quote in quotes:
+            if isinstance(quote, dict) and "quote" in quote:
+                p = doc.add_paragraph(style='Quote')
+                p.add_run(f'"{quote["quote"]}"')
+                if "attribution" in quote and quote["attribution"]:
+                    p.add_run(f" — {quote['attribution']}")
+            elif isinstance(quote, str):
+                p = doc.add_paragraph(style='Quote')
+                # If it's already quoted, use as-is, otherwise add quotes
+                if quote.startswith('"') and quote.endswith('"'):
+                    p.add_run(quote)
+                else:
+                    p.add_run(f'"{quote}"')
 
     def _add_from_markdown(self, doc: Document, markdown_text: str) -> None:
         """
@@ -98,7 +229,7 @@ class DocxExporter:
             # Process based on section type
             if "Participants" in section_title or "Decisions Made" in section_title or \
                     "Actions Planned" in section_title or "Open Questions" in section_title or \
-                    "Risks & Mitigations" in section_title or "Technical Terminology" in section_title:
+                    "Technical Terminology" in section_title:
                 # This is a table section
                 self._add_markdown_table(doc, section_content)
 
@@ -114,14 +245,8 @@ class DocxExporter:
                     doc.add_paragraph(clean_content.strip())
 
             elif "Key Quotes" in section_title:
-                # Extract blockquotes
-                quote_pattern = r'>\s*"(.*?)"\s*–\s*(.*?)(?=\n>|\n\n|$)'
-                quotes = re.findall(quote_pattern, section_content)
-
-                for quote_text, attribution in quotes:
-                    p = doc.add_paragraph(style='Quote')
-                    p.add_run(f'"{quote_text.strip()}"')
-                    p.add_run(f" — {attribution.strip()}")
+                # Handle multiple quote formats more robustly
+                self._add_key_quotes_from_markdown(doc, section_content)
 
             elif "Content Gaps" in section_title:
                 # Extract bullet points
@@ -520,50 +645,8 @@ class DocxExporter:
 
         # Removed extra spacing
 
-    def _add_risks_table(self, doc: Document, risks: List[Any]) -> None:
-        """Add risks and mitigations table"""
-        doc.add_heading("Risks & Mitigations", level=1)
-
-        if not risks:
-            doc.add_paragraph("No risks identified.")
-            return
-
-        # Create table
-        table = doc.add_table(rows=1, cols=4)
-        table.style = 'Table Grid'
-
-        # Set header row
-        header_cells = table.rows[0].cells
-        header_cells[0].text = "Risk"
-        header_cells[1].text = "Impact"
-        header_cells[2].text = "Mitigation"
-        header_cells[3].text = "Owner"
-
-        # Make header row bold
-        for cell in header_cells:
-            for paragraph in cell.paragraphs:
-                for run in paragraph.runs:
-                    run.bold = True
-
-        # Add risk rows
-        for risk in risks:
-            if isinstance(risk, dict):
-                row_cells = table.add_row().cells
-                row_cells[0].text = risk.get("risk", "")
-                row_cells[1].text = risk.get("impact", "")
-                row_cells[2].text = risk.get("mitigation", "")
-                row_cells[3].text = risk.get("owner", "")
-            elif isinstance(risk, str):
-                row_cells = table.add_row().cells
-                row_cells[0].text = risk
-                row_cells[1].text = ""
-                row_cells[2].text = ""
-                row_cells[3].text = ""
-
-        # Removed extra spacing
-
     def _add_key_quotes(self, doc: Document, quotes: List[Any]) -> None:
-        """Add key quotes section"""
+        """Add key quotes section (original method for structured data)"""
         doc.add_heading("Key Quotes", level=1)
 
         if not quotes:
@@ -574,11 +657,15 @@ class DocxExporter:
             if isinstance(quote, dict) and "quote" in quote:
                 p = doc.add_paragraph(style='Quote')
                 p.add_run(f'"{quote["quote"]}"')
-                if "attribution" in quote:
+                if "attribution" in quote and quote["attribution"]:
                     p.add_run(f" — {quote['attribution']}")
             elif isinstance(quote, str):
                 p = doc.add_paragraph(style='Quote')
-                p.add_run(f'"{quote}"')
+                # If it's already quoted, use as-is, otherwise add quotes
+                if quote.startswith('"') and quote.endswith('"'):
+                    p.add_run(quote)
+                else:
+                    p.add_run(f'"{quote}"')
 
         # Removed extra spacing
 
