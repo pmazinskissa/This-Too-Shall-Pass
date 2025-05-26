@@ -156,6 +156,7 @@ class OpenAIHelper:
           - Capture the exact "Organization / Title" string if stated; attempt to ascertain accurate Organization/Title for each participant. 
           - Derive a concise "Meeting Role" (e.g., "Executive sponsor", "Change-management lead").
           - Ensure that each participant is represented but do not duplicate participants.
+          - Only include participants who speak. Do not include individuals that are simply mentioned.
 
         ## 3. Conversation Flow Summary 
         - **Output:** Six to twelve numbered "scenes" (or adjust to the natural breaks and topic changes in the transcript). 
@@ -176,6 +177,7 @@ class OpenAIHelper:
           | Action | Responsible | Timeline | 
           - Find "action" statements ("we will", "please", "I'll", etc.). 
           - Convert relative dates (e.g. "next week") into calendar dates.  
+          - "Action" = ≤25 words; "Responsible" = comma-separated names; "Timeline" = Deadline or expected duration
 
         ## 6. Open Questions 
         - **Output:** A three-column Markdown table: 
@@ -184,11 +186,9 @@ class OpenAIHelper:
           - Keep them as direct quotes or close paraphrases.
 
         ## 7. Key Quotes 
-        - **Output:** 3-5 block-quoted lines (`> "…"`) of quotes that were of particular importance within the meeting. Prioritize quotes that support the executive summary.
-          - IMPORTANT: Do NOT include any quotes from SSA members or employees. Only include quotes from external participants, clients, vendors, or consultants.
+        - **Output:** 3-5 block-quoted lines (`> "…"`) of quotes that were of particular importance within the meeting. Prioritize quotes that support the content of the executive summary.
+          - Prioritize including quotes from non-SSA members or employees. If possible include quotes from external participants, clients, vendors, or consultants. If no external participants are present you are allowed to use quotes from SSA members.
           - Each quote should be ≤50 words and must include speaker attribution (e.g. `– Name`).
-          - If you cannot find enough important quotes from non-SSA participants, include fewer quotes rather than using quotes from SSA members.
-          - Double-check each attribution to ensure it is not from someone affiliated with SSA.
 
         ## 8. Sentiment Analysis 
         - **Output:** One short paragraph, at least 3 sentences, naming the overall tone (e.g. "constructively optimistic"), the main positive driver (if present), and main concern (if present).
@@ -245,8 +245,6 @@ class OpenAIHelper:
         user_prompt += """
         IMPORTANT NOTES: 
         1. For the Conversation Flow Summary section, each scene MUST include at least 3-4 detailed sentences (minimum 50-75 words per scene) with specific information about what was discussed, who spoke, and how the conversation progressed. This level of detail is absolutely required.
-
-        2. For the Key Quotes section, DO NOT include quotes from SSA members or employees. Only select quotes from external participants, clients, vendors, or consultants. If you can't find enough non-SSA quotes, include fewer quotes rather than using any from SSA members.
         """
 
         try:
@@ -301,8 +299,8 @@ class OpenAIHelper:
                 1. A brief summary of the main points discussed in this section (2-3 sentences)
                 2. Any participants mentioned with their roles or affiliations
                   - IMPORTANT: Only note organizations or titles that are EXPLICITLY stated in the text
-                  - For any participant whose organization or title is not clearly stated, mark as "(Affiliation not stated)"
                   - Clearly mark participants from SSA (the host organization) vs external participants
+                  - Only include participants who speak. Do not include individuals that are simply mentioned.
                 3. Key discussion topics (with minimum 3-4 sentences of detail per topic)
                 4. Any decisions made
                 5. Any actions planned
@@ -321,8 +319,8 @@ class OpenAIHelper:
                 1. A brief summary of the main points discussed in this section (2-3 sentences)
                 2. Any participants mentioned with their roles or affiliations
                   - IMPORTANT: Only note organizations or titles that are EXPLICITLY stated in the text
-                  - For any participant whose organization or title is not clearly stated, mark as "(Affiliation not stated)"
                   - Clearly mark participants from SSA (the host organization) vs external participants
+                  - Only include participants who speak. Do not include individuals that are simply mentioned.
                 3. Key discussion topics (with minimum 3-4 sentences of detail per topic)
                 4. Any decisions made
                 5. Any actions planned
@@ -406,18 +404,19 @@ class OpenAIHelper:
         - **Output:** A two paragraph summary that captures the key points, outcomes, and significance of the meeting:
           - **Paragraph 1:** Why we met, the major context, and overall aims. 
           - **Paragraph 2:** Key agreements, tone, and top take-aways. 
-        - **Style:** Active voice, plain business language, ~120–150 words per paragraph, no bullet lists.
+        - **Style:** Active voice, plain business language, ~120–180 words per paragraph, no bullet lists.
 
         ## 2. Participants 
         - **Output:** A three-column Markdown table: 
           | Name | Organization / Title | Meeting Role | 
-          - Pull names from every speaker introduction. 
-          - Capture the exact "Organization / Title" string if stated; attempt to ascertain accurate Organization/Title for each participant; else use "(Affiliation not stated)". 
+          - Pull names from every speaker introduction or attribution within the transcript. 
+          - Capture the exact "Organization / Title" string if stated; attempt to ascertain accurate Organization/Title for each participant. 
           - Derive a concise "Meeting Role" (e.g., "Executive sponsor", "Change-management lead").
           - Ensure that each participant is represented but do not duplicate participants.
+          - Only include participants who speak. Do not include individuals that are simply mentioned.
 
         ## 3. Conversation Flow Summary 
-        - **Output:** Eight to twelve numbered "scenes" (or adjust to the natural breaks in the transcript). 
+        - **Output:** Six to twelve numbered "scenes" (or adjust to the natural breaks and topic changes in the transcript). 
           - Each scene gets a `### n · Title` heading (3–5 words). 
           - Under each, write **MINIMUM 3-4 detailed sentences** (this is mandatory) summarizing: main discussion point(s), key participants, and notable tone or reaction. Each scene must have at least 50-75 words to provide sufficient detail. 
           - Keep tense past, third-person, no bullets.
@@ -435,6 +434,7 @@ class OpenAIHelper:
           | Action | Responsible | Timeline | 
           - Find "action" statements ("we will", "please", "I'll", etc.). 
           - Convert relative dates (e.g. "next week") into calendar dates.  
+          - "Action" = ≤25 words; "Responsible" = comma-separated names; "Timeline" = Deadline or expected duration
 
         ## 6. Open Questions 
         - **Output:** A three-column Markdown table: 
@@ -443,11 +443,9 @@ class OpenAIHelper:
           - Keep them as direct quotes or close paraphrases.
 
         ## 7. Key Quotes 
-        - **Output:** 3-5 block-quoted lines (`> "…"`) of quotes that were of particular importance within the meeting. Prioritize quotes that support the executive summary.
-          - IMPORTANT: Do NOT include any quotes from SSA members or employees. Only include quotes from external participants, clients, vendors, or consultants.
+        - **Output:** 3-5 block-quoted lines (`> "…"`) of quotes that were of particular importance within the meeting. Prioritize quotes that support the content of the executive summary.
+          - Prioritize including quotes from non-SSA members or employees. If possible include quotes from external participants, clients, vendors, or consultants. If no external participants are present you are allowed to use quotes from SSA members.
           - Each quote should be ≤50 words and must include speaker attribution (e.g. `– Name`).
-          - If you cannot find enough important quotes from non-SSA participants, include fewer quotes rather than using quotes from SSA members.
-          - Double-check each attribution to ensure it is not from someone affiliated with SSA.
 
         ## 8. Sentiment Analysis 
         - **Output:** One short paragraph, at least 3 sentences, naming the overall tone (e.g. "constructively optimistic"), the main positive driver (if present), and main concern (if present).
@@ -506,8 +504,6 @@ class OpenAIHelper:
         consolidation_user_prompt += """
         IMPORTANT NOTES: 
         1. For the Conversation Flow Summary section, each scene MUST include at least 3-4 detailed sentences (minimum 50-75 words per scene) with specific information about what was discussed, who spoke, and how the conversation progressed. This level of detail is absolutely required.
-
-        2. For the Key Quotes section, DO NOT include quotes from SSA members or employees. Only select quotes from external participants, clients, vendors, or consultants. If you can't find enough non-SSA quotes, include fewer quotes rather than using any from SSA members.
         """
 
         try:
