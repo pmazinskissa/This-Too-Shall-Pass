@@ -37,7 +37,6 @@ SUMMARY_STRUCTURE = {
     'decisions_made': [],
     'actions_planned': [],
     'open_questions': [],
-    'risks_mitigations': [],
     'key_quotes': [],
     'sentiment_analysis': 'Analysis of meeting tone and engagement.',
     'content_gaps': [],
@@ -56,11 +55,10 @@ Your output should be in JSON format with the following sections:
 4. decisions_made: List of decisions with details and owners
 5. actions_planned: List of actions with responsible parties, timelines, and notes
 6. open_questions: Unresolved questions with context and owners
-7. risks_mitigations: Identified risks with impact, mitigation, and owners
-8. key_quotes: Notable quotes with attribution
-9. sentiment_analysis: Brief analysis of the meeting's tone and engagement
-10. content_gaps: Potential missing information or topics
-11. terminology: Technical terms and acronyms mentioned with definitions
+7. key_quotes: Notable quotes with attribution
+8. sentiment_analysis: Brief analysis of the meeting's tone and engagement
+9. content_gaps: Potential missing information or topics
+10. terminology: Technical terms and acronyms mentioned with definitions
 
 For any sections where information is not available in the transcript, include a placeholder note.
 Focus on accuracy, clarity, and maintaining the original meaning.
