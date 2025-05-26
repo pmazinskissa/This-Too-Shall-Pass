@@ -159,12 +159,12 @@ class SummaryGenerator:
                     })
 
             elif "Decisions Made" in section_title:
-                # Extract table rows
-                table_pattern = r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|'
+                # Extract table rows - 3 columns: Decision, Details, Owner(s)
+                table_pattern = r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|'
                 decisions = re.findall(table_pattern, section_content)
                 # Skip the header row if present
-                for i, (num, decision, details, owner) in enumerate(decisions):
-                    if i == 0 and (num.strip() == "#" or "---" in num):
+                for i, (decision, details, owner) in enumerate(decisions):
+                    if i == 0 and (decision.strip() == "Decision" or "---" in decision):
                         continue
                     sections["decisions_made"].append({
                         "decision": decision.strip(),
@@ -173,18 +173,17 @@ class SummaryGenerator:
                     })
 
             elif "Actions Planned" in section_title:
-                # Extract table rows
-                table_pattern = r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|'
+                # Extract table rows - 3 columns: Action, Responsible, Timeline
+                table_pattern = r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|'
                 actions = re.findall(table_pattern, section_content)
                 # Skip the header row if present
-                for i, (action, responsible, timeline, notes) in enumerate(actions):
+                for i, (action, responsible, timeline) in enumerate(actions):
                     if i == 0 and (action.strip() == "Action" or "---" in action):
                         continue
                     sections["actions_planned"].append({
                         "action": action.strip(),
                         "responsible": responsible.strip(),
-                        "timeline": timeline.strip(),
-                        "notes": notes.strip()
+                        "timeline": timeline.strip()
                     })
 
             elif "Open Questions" in section_title:
