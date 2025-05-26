@@ -594,15 +594,15 @@ class DocxExporter:
         # Removed extra spacing
 
     def _add_actions_table(self, doc: Document, actions: List[Any]) -> None:
-        """Add actions table"""
+        """Add actions table - Updated to 3 columns (removed Notes column)"""
         doc.add_heading("Actions Planned", level=1)
 
         if not actions:
             doc.add_paragraph("No actions recorded.")
             return
 
-        # Create table
-        table = doc.add_table(rows=1, cols=4)
+        # Create table with 3 columns (removed Notes column)
+        table = doc.add_table(rows=1, cols=3)
         table.style = 'Table Grid'
 
         # Set header row
@@ -610,7 +610,6 @@ class DocxExporter:
         header_cells[0].text = "Action"
         header_cells[1].text = "Responsible"
         header_cells[2].text = "Timeline"
-        header_cells[3].text = "Notes"
 
         # Make header row bold
         for cell in header_cells:
@@ -625,13 +624,12 @@ class DocxExporter:
                 row_cells[0].text = action.get("action", "")
                 row_cells[1].text = action.get("responsible", "")
                 row_cells[2].text = action.get("timeline", "")
-                row_cells[3].text = action.get("notes", "")
+                # Removed notes column
             elif isinstance(action, str):
                 row_cells = table.add_row().cells
                 row_cells[0].text = action
                 row_cells[1].text = ""
                 row_cells[2].text = ""
-                row_cells[3].text = ""
 
         # Removed extra spacing
 
