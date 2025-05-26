@@ -4,6 +4,7 @@ from docx.shared import Pt, Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.enum.style import WD_STYLE_TYPE
+import re
 
 
 class DocxExporter:
@@ -74,6 +75,28 @@ class DocxExporter:
 
         # Save document
         doc.save(output_path)
+
+    def _add_formatted_text(self, paragraph, text: str) -> None:
+        """
+        Add text to a paragraph with markdown bold formatting converted to Word bold
+
+        Args:
+            paragraph: The Word paragraph to add text to
+            text: Text that may contain **bold** markdown formatting
+        """
+        # Split text by bold markers
+        parts = re.split(r'\*\*(.*?)\*\*', text)
+
+        for i, part in enumerate(parts):
+            if i % 2 == 0:
+                # Regular text (even indices)
+                if part:
+                    paragraph.add_run(part)
+            else:
+                # Bold text (odd indices - content between **)
+                if part:
+                    run = paragraph.add_run(part)
+                    run.bold = True
 
     def _add_key_quotes_from_markdown(self, doc: Document, section_content: str) -> None:
         """
@@ -249,13 +272,19 @@ class DocxExporter:
                 self._add_key_quotes_from_markdown(doc, section_content)
 
             elif "Content Gaps" in section_title:
-                # Extract bullet points
-                bullet_pattern = r'-\s*(.*?)(?=\n-|\n\n|$)'
-                gaps = re.findall(bullet_pattern, section_content)
+                # Extract numbered list items
+                numbered_pattern = r'\d+\.\s*(.*?)(?=\n\d+\.|\n\n|$)'
+                gaps = re.findall(numbered_pattern, section_content, re.DOTALL)
+
+                # If no numbered items found, fall back to bullet points for backward compatibility
+                if not gaps:
+                    bullet_pattern = r'-\s*(.*?)(?=\n-|\n\n|$)'
+                    gaps = re.findall(bullet_pattern, section_content)
 
                 for gap in gaps:
-                    p = doc.add_paragraph(style='List Bullet')
-                    p.add_run(gap.strip())
+                    p = doc.add_paragraph(style='List Number')
+                    # Use the new method to handle bold formatting
+                    self._add_formatted_text(p, gap.strip())
 
             else:
                 # Regular paragraph section (Executive Summary, Sentiment Analysis)
@@ -683,14 +712,16 @@ class DocxExporter:
             doc.add_paragraph("No content gaps identified.")
             return
 
-        # Add bulleted list
+        # Add numbered list
         for gap in gaps:
             if isinstance(gap, dict) and "gap" in gap:
-                p = doc.add_paragraph(style='List Bullet')
-                p.add_run(f"{gap['gap']}")
+                p = doc.add_paragraph(style='List Number')
+                # Use the new method to handle bold formatting
+                self._add_formatted_text(p, gap['gap'])
             elif isinstance(gap, str):
-                p = doc.add_paragraph(style='List Bullet')
-                p.add_run(f"{gap}")
+                p = doc.add_paragraph(style='List Number')
+                # Use the new method to handle bold formatting
+                self._add_formatted_text(p, gap)
 
         # Removed extra spacing
 
