@@ -147,18 +147,18 @@ class OpenAIHelper:
         - **Output:** A two paragraph summary that captures the key points, outcomes, and significance of the meeting:
           - **Paragraph 1:** Why we met, the major context, and overall aims. 
           - **Paragraph 2:** Key agreements, tone, and top take-aways. 
-        - **Style:** Active voice, plain business language, ~120–150 words per paragraph, no bullet lists.
+        - **Style:** Active voice, plain business language, ~120–180 words per paragraph, no bullet lists.
 
         ## 2. Participants 
         - **Output:** A three-column Markdown table: 
           | Name | Organization / Title | Meeting Role | 
-          - Pull names from every speaker introduction. 
-          - Capture the exact "Organization / Title" string if stated; attempt to ascertain accurate Organization/Title for each participant; else use "(Affiliation not stated)". 
+          - Pull names from every speaker introduction or attribution within the transcript. 
+          - Capture the exact "Organization / Title" string if stated; attempt to ascertain accurate Organization/Title for each participant. 
           - Derive a concise "Meeting Role" (e.g., "Executive sponsor", "Change-management lead").
           - Ensure that each participant is represented but do not duplicate participants.
 
         ## 3. Conversation Flow Summary 
-        - **Output:** Eight to twelve numbered "scenes" (or adjust to the natural breaks in the transcript). 
+        - **Output:** Six to twelve numbered "scenes" (or adjust to the natural breaks and topic changes in the transcript). 
           - Each scene gets a `### n · Title` heading (3–5 words). 
           - Under each, write **MINIMUM 3-4 detailed sentences** (this is mandatory) summarizing: main discussion point(s), key participants, and notable tone or reaction. Each scene must have at least 50-75 words to provide sufficient detail. 
           - Keep tense past, third-person, no bullets.
@@ -166,16 +166,16 @@ class OpenAIHelper:
           - For each scene, specifically identify: 1) What specifically was discussed, 2) Who the main speakers were, 3) What perspectives were shared, and 4) How the conversation progressed.
 
         ## 4. Decisions Made 
-        - **Output:** A four-column Markdown table: 
-          | # | Decision | Details | Owner(s) | 
+        - **Output:** A three-column Markdown table: 
+          | Decision | Details | Owner(s) | 
           - Extract every firm decision (words like "agreed", "decided", "confirmed"). 
           - "Decision" = 3–7 word noun phrase; "Details" ≤25 words; "Owner(s)" = comma-separated names.
 
         ## 5. Actions Planned 
-        - **Output:** A four-column Markdown table: 
-          | Action | Responsible | Timeline | Notes | 
+        - **Output:** A three-column Markdown table: 
+          | Action | Responsible | Timeline | 
           - Find "action" statements ("we will", "please", "I'll", etc.). 
-          - Convert relative dates (e.g. "next week") into calendar dates. 
+          - Convert relative dates (e.g. "next week") into calendar dates.  
 
         ## 6. Open Questions 
         - **Output:** A three-column Markdown table: 
@@ -194,7 +194,8 @@ class OpenAIHelper:
         - **Output:** One short paragraph, at least 3 sentences, naming the overall tone (e.g. "constructively optimistic"), the main positive driver (if present), and main concern (if present).
 
         ## 9. Content Gaps 
-        - **Output:** A list of what should have been discussed but wasn't, of what questions should have been asked but weren't, missing topics, missing people, etc. Use your best judgement to identify the missing elements of the meeting. For each content gap include a short description of the gap and potential remediation.
+        - **Output:** A numbered list of what should have been discussed but wasn't, of what questions should have been asked but weren't, missing topics, missing people, etc. Use your best judgement to identify the missing elements of the meeting. For each content gap include a short description of the gap and potential remediation.
+        - **Format:** Each item should be numbered (1., 2., 3., etc.) and follow this format: "Content Gap Title: Description of the gap and potential remediation"
 
         ## 10. Technical Terminology & Acronyms 
         - **Output:** A two-column Markdown table: 
@@ -424,16 +425,16 @@ class OpenAIHelper:
           - For each scene, specifically identify: 1) What specifically was discussed, 2) Who the main speakers were, 3) What perspectives were shared, and 4) How the conversation progressed.
 
         ## 4. Decisions Made 
-        - **Output:** A four-column Markdown table: 
-          | # | Decision | Details | Owner(s) | 
+        - **Output:** A three-column Markdown table: 
+          | Decision | Details | Owner(s) | 
           - Extract every firm decision (words like "agreed", "decided", "confirmed"). 
           - "Decision" = 3–7 word noun phrase; "Details" ≤25 words; "Owner(s)" = comma-separated names.
 
         ## 5. Actions Planned 
-        - **Output:** A four-column Markdown table: 
-          | Action | Responsible | Timeline | Notes | 
+        - **Output:** A three-column Markdown table: 
+          | Action | Responsible | Timeline | 
           - Find "action" statements ("we will", "please", "I'll", etc.). 
-          - Convert relative dates (e.g. "next week") into calendar dates. 
+          - Convert relative dates (e.g. "next week") into calendar dates.  
 
         ## 6. Open Questions 
         - **Output:** A three-column Markdown table: 
@@ -452,7 +453,8 @@ class OpenAIHelper:
         - **Output:** One short paragraph, at least 3 sentences, naming the overall tone (e.g. "constructively optimistic"), the main positive driver (if present), and main concern (if present).
 
         ## 9. Content Gaps 
-        - **Output:** A list of what should have been discussed but wasn't, of what questions should have been asked but weren't, missing topics, missing people, etc. Use your best judgement to identify the missing elements of the meeting. For each content gap include a short description of the gap and potential remediation.
+        - **Output:** A numbered list of what should have been discussed but wasn't, of what questions should have been asked but weren't, missing topics, missing people, etc. Use your best judgement to identify the missing elements of the meeting. For each content gap include a short description of the gap and potential remediation.
+        - **Format:** Each item should be numbered (1., 2., 3., etc.) and follow this format: "Content Gap Title: Description of the gap and potential remediation"
 
         ## 10. Technical Terminology & Acronyms 
         - **Output:** A two-column Markdown table: 
@@ -557,8 +559,8 @@ The sentiment analysis could not be completed due to processing limitations with
 
 ## 9. Content Gaps
 
-- Complete analysis of the transcript
-- Detailed extraction of all meeting elements
+1. Complete analysis of the transcript: The system was unable to fully process this large transcript. Consider breaking it into smaller sections for more detailed analysis.
+2. Detailed extraction of all meeting elements: Due to processing limitations, manual review is recommended for complete understanding.
 
 ## 10. Technical Terminology & Acronyms
 
