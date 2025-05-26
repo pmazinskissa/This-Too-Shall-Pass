@@ -251,9 +251,15 @@ class SummaryGenerator:
                 sections["sentiment_analysis"] = section_content
 
             elif "Content Gaps" in section_title:
-                # Extract bullet points
-                bullet_pattern = r'-\s*(.*?)(?=\n-|\n\n|$)'
-                gaps = re.findall(bullet_pattern, section_content)
+                # Extract numbered list items
+                numbered_pattern = r'\d+\.\s*(.*?)(?=\n\d+\.|\n\n|$)'
+                gaps = re.findall(numbered_pattern, section_content, re.DOTALL)
+
+                # If no numbered items found, fall back to bullet points for backward compatibility
+                if not gaps:
+                    bullet_pattern = r'-\s*(.*?)(?=\n-|\n\n|$)'
+                    gaps = re.findall(bullet_pattern, section_content)
+
                 sections["content_gaps"] = [gap.strip() for gap in gaps]
 
             elif "Technical Terminology" in section_title or "Acronyms" in section_title:
