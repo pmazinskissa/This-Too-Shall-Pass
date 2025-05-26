@@ -129,7 +129,7 @@ class OpenAIHelper:
 
             Even though you're {persona_prompt}, you still need to follow these format requirements:
 
-            Your output must be structured in exactly the format below with numbered sections 1-11.
+            Your output must be structured in exactly the format below with numbered sections 1-10.
             Each section must follow the specified format, but your tone, vocabulary, and style should reflect {persona_prompt}.
             """
         else:
@@ -183,25 +183,20 @@ class OpenAIHelper:
           - Identify questions that received no definitive answer in the meeting transcript. 
           - Keep them as direct quotes or close paraphrases.
 
-        ## 7. Risks & Mitigations 
-        - **Output:** A four-column Markdown table: 
-          | Risk | Impact | Mitigation | Owner | 
-          - Capture any "risk", "concern", or "issue" language, pair with nearby mitigation suggestions.
-
-        ## 8. Key Quotes 
+        ## 7. Key Quotes 
         - **Output:** 3-5 block-quoted lines (`> "…"`) of quotes that were of particular importance within the meeting. Prioritize quotes that support the executive summary.
           - IMPORTANT: Do NOT include any quotes from SSA members or employees. Only include quotes from external participants, clients, vendors, or consultants.
           - Each quote should be ≤50 words and must include speaker attribution (e.g. `– Name`).
           - If you cannot find enough important quotes from non-SSA participants, include fewer quotes rather than using quotes from SSA members.
           - Double-check each attribution to ensure it is not from someone affiliated with SSA.
 
-        ## 9. Sentiment Analysis 
+        ## 8. Sentiment Analysis 
         - **Output:** One short paragraph, at least 3 sentences, naming the overall tone (e.g. "constructively optimistic"), the main positive driver (if present), and main concern (if present).
 
-        ## 10. Content Gaps 
+        ## 9. Content Gaps 
         - **Output:** A list of what should have been discussed but wasn't, of what questions should have been asked but weren't, missing topics, missing people, etc. Use your best judgement to identify the missing elements of the meeting. For each content gap include a short description of the gap and potential remediation.
 
-        ## 11. Technical Terminology & Acronyms 
+        ## 10. Technical Terminology & Acronyms 
         - **Output:** A two-column Markdown table: 
           | Term | Definition | 
           - Gather all capitalized tokens or acronyms ≥2 characters used ≥2 times. 
@@ -311,9 +306,8 @@ class OpenAIHelper:
                 4. Any decisions made
                 5. Any actions planned
                 6. Any open questions raised
-                7. Any risks or concerns mentioned
-                8. Notable quotes from participants (clearly indicate which quotes are from non-SSA/external participants)
-                9. Any technical terms or acronyms used
+                7. Notable quotes from participants (clearly indicate which quotes are from non-SSA/external participants)
+                8. Any technical terms or acronyms used
 
                 Respond in plain text, organized by the categories above. Be specific and extract actual details from the transcript.
                 Your analysis should reflect your persona in tone, vocabulary and style.
@@ -332,9 +326,8 @@ class OpenAIHelper:
                 4. Any decisions made
                 5. Any actions planned
                 6. Any open questions raised
-                7. Any risks or concerns mentioned
-                8. Notable quotes from participants (clearly indicate which quotes are from non-SSA/external participants)
-                9. Any technical terms or acronyms used
+                7. Notable quotes from participants (clearly indicate which quotes are from non-SSA/external participants)
+                8. Any technical terms or acronyms used
 
                 Respond in plain text, organized by the categories above. Be specific and extract actual details from the transcript.
                 """
@@ -393,7 +386,7 @@ class OpenAIHelper:
 
             Even though you're {persona_prompt}, you still need to follow these format requirements:
 
-            Your output must be structured in exactly the format below with numbered sections 1-11.
+            Your output must be structured in exactly the format below with numbered sections 1-10.
             Each section must follow the specified format, but your tone, vocabulary, and style should reflect {persona_prompt}.
 
             You are an expert in analyzing and summarizing business meeting transcripts. Your task is to extract key information and create a comprehensive structured summary.
@@ -448,25 +441,20 @@ class OpenAIHelper:
           - Identify questions that received no definitive answer in the meeting transcript. 
           - Keep them as direct quotes or close paraphrases.
 
-        ## 7. Risks & Mitigations 
-        - **Output:** A four-column Markdown table: 
-          | Risk | Impact | Mitigation | Owner | 
-          - Capture any "risk", "concern", or "issue" language, pair with nearby mitigation suggestions.
-
-        ## 8. Key Quotes 
+        ## 7. Key Quotes 
         - **Output:** 3-5 block-quoted lines (`> "…"`) of quotes that were of particular importance within the meeting. Prioritize quotes that support the executive summary.
           - IMPORTANT: Do NOT include any quotes from SSA members or employees. Only include quotes from external participants, clients, vendors, or consultants.
           - Each quote should be ≤50 words and must include speaker attribution (e.g. `– Name`).
           - If you cannot find enough important quotes from non-SSA participants, include fewer quotes rather than using quotes from SSA members.
           - Double-check each attribution to ensure it is not from someone affiliated with SSA.
 
-        ## 9. Sentiment Analysis 
+        ## 8. Sentiment Analysis 
         - **Output:** One short paragraph, at least 3 sentences, naming the overall tone (e.g. "constructively optimistic"), the main positive driver (if present), and main concern (if present).
 
-        ## 10. Content Gaps 
+        ## 9. Content Gaps 
         - **Output:** A list of what should have been discussed but wasn't, of what questions should have been asked but weren't, missing topics, missing people, etc. Use your best judgement to identify the missing elements of the meeting. For each content gap include a short description of the gap and potential remediation.
 
-        ## 11. Technical Terminology & Acronyms 
+        ## 10. Technical Terminology & Acronyms 
         - **Output:** A two-column Markdown table: 
           | Term | Definition | 
           - Gather all capitalized tokens or acronyms ≥2 characters used ≥2 times. 
@@ -563,16 +551,16 @@ The meeting covered multiple topics that could not be fully processed due to the
 |--------|------------|----------|-------|
 | Review original transcript | All participants | As soon as possible | Due to processing limitations |
 
-## 9. Sentiment Analysis
+## 8. Sentiment Analysis
 
 The sentiment analysis could not be completed due to processing limitations with this large transcript.
 
-## 10. Content Gaps
+## 9. Content Gaps
 
 - Complete analysis of the transcript
 - Detailed extraction of all meeting elements
 
-## 11. Technical Terminology & Acronyms
+## 10. Technical Terminology & Acronyms
 
 | Term | Definition |
 |------|------------|
